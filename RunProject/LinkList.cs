@@ -8,7 +8,7 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 
-class LinkList<T> : IEnumerable<T>
+public class LinkList<T> : IEnumerable<T>
 {
     Node? start;
     public class Node
@@ -22,13 +22,13 @@ class LinkList<T> : IEnumerable<T>
             prev = prev_;
             next = next_;
         }
-        public Node PushNext(T val)
-        {
+        //public Node PushNext(T val)
+        //{
 
-            Node newNode = new Node(val, this, next);
-            this.next = newNode;
-            return newNode;
-        }
+        //    Node newNode = new Node(val, this, next);
+        //    this.next = newNode;
+        //    return newNode;
+        //}
     }
     public LinkList()
     {
@@ -53,6 +53,10 @@ class LinkList<T> : IEnumerable<T>
             LinkList<T> list = new LinkList<T>(start.next);
             list.PushLast(vals);
             start.next = list.start;
+            if(list.start!=null)
+            {
+                list.start.prev = start;
+            }
         }
     }
 
@@ -70,6 +74,7 @@ class LinkList<T> : IEnumerable<T>
                         start.prev.next = start.next;
                     if (start.next != null) 
                         start.next.prev = start.prev;
+                    start = start.next;
                 }
                 return true;
             }
@@ -95,7 +100,7 @@ class LinkList<T> : IEnumerable<T>
 
         public void Dispose()
         {
-            Reset();
+            //Reset();
         }
 
         public bool MoveNext()
