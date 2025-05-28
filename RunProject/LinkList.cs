@@ -5,14 +5,70 @@ using System.Data;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-public class LinkList<T> : IEnumerable<T>
+public class LinkList<T> : IEnumerable<T>, IList<T>
 {
     Node? start;
+
+    public int Count {
+        get
+        {
+            if (start != null) return start.Count;
+            else return 0;
+        }
+    }
+
+    public bool IsReadOnly
+    {
+        get
+        {
+            return false;
+        }
+    }
+
+    public T this[int index] { 
+        get
+        {
+            if (start != null) return start[index];
+            else throw new IndexOutOfRangeException();
+        }
+        set
+        {
+            if (start != null) start[index] = value;
+            else throw new IndexOutOfRangeException();
+        }
+    }
+
     public class Node
     {
+        public T this[int index]
+        {
+            get
+            {
+                if (index <0)
+                {
+                    if (prev != null) return prev[index + 1];
+                    else throw new IndexOutOfRangeException();
+                }
+                else if (index == 0) return value;
+                else if (next != null) return next[index - 1];
+                else throw new IndexOutOfRangeException();
+            }
+            set
+            {
+                if (index < 0)
+                {
+                    if (prev != null) prev[index + 1] = value;
+                    else throw new IndexOutOfRangeException();
+                }
+                else if (index == 0) this.value = value;
+                else if (next != null) next[index - 1] = value;
+                else throw new IndexOutOfRangeException();
+            }
+        }
         public T value;
         public Node? prev;
         public Node? next;
@@ -21,6 +77,18 @@ public class LinkList<T> : IEnumerable<T>
             value = val;
             prev = prev_;
             next = next_;
+        }
+        public int Count
+        {
+            get
+            {
+                if (next != null) return next.Count + 1;
+                else return 1;
+            }
+        }
+        public  bool Remove(T item)
+        {
+            if (value.Equals(item))
         }
         //public Node PushNext(T val)
         //{
@@ -132,5 +200,44 @@ public class LinkList<T> : IEnumerable<T>
     public void Clear()
     {
         start = null;
+    }
+
+    public void Add(T item)
+    {
+        PushLast([item]);
+    }
+
+    public bool Contains(T item)
+    {
+        return ((IEnumerable<T>) this).Contains(item);
+    }
+
+    public void CopyTo(T[] array, int arrayIndex)
+    {
+        ((IEnumerable<T>)this).ToList().CopyTo(array, arrayIndex);
+    }
+
+    public bool Remove(T item)
+    {
+        if (start != null)
+        {
+            return start.Remove(item);
+        }
+        else return false;
+    }
+
+    public int IndexOf(T item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Insert(int index, T item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void RemoveAt(int index)
+    {
+        throw new NotImplementedException();
     }
 }

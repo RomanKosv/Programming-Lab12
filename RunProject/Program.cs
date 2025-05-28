@@ -89,7 +89,8 @@ Type inpType()
 //                Console.WriteLine("Input name to delete");
 //                Game? deleted = null;
 //                string name = ConsoleInput.MEAN_PART.get();
-//                if (linkList.PopLast(game => game.Name == name, ref deleted)) {
+//                if (linkList.PopLast(game => game.Name == name, ref deleted))
+//                {
 //                    Console.WriteLine("Deleted game:");
 //                    deleted.Show();
 //                }
@@ -120,11 +121,90 @@ Type inpType()
 //}
 //GC.Collect();
 
-MyHashtable<int, int> table = new MyHashtable<int, int>();
+MyHashtable<string, Game> table = new MyHashtable<string, Game>();
 Random rand = new Random();
-for (int i = 0; i < 10; i++)
+bool stopTask2 = false;
+do
 {
-    int key = rand.Next(20), val = rand.Next(20);
-    Console.WriteLine("added " + val + " to " + key);
-    table[key] = val;
-}
+    Console.WriteLine("Input command (add/show/remove/find/state)");
+    switch (ConsoleInput.MEAN_PART.check(Checks.Into(["add", "show", "remove", "find", "state", "stop"]), "Command must be add, show, state, remove or find").get())
+    {
+        case "show":
+            if (table.Count != 0)
+            {
+                Console.WriteLine("Pairs");
+                foreach (var (k, v) in table.Pairs())
+                {
+                    Console.WriteLine("Key:" + k);
+                    Console.WriteLine("Value:");
+                    v.Show();
+                }
+            }
+            else Console.WriteLine("Table empty");
+            break;
+        case "add":
+            Console.WriteLine("Input mode (input/random)");
+            switch (ConsoleInput.MEAN_PART.check(Checks.Into(["input", "random"]), "Mode must be input o random").get()) {
+                case "input":
+                    Console.WriteLine("Input key to add");
+                    string key = ConsoleInput.LINE.get();
+                    //Console.WriteLine("Input type of game to add");
+                    Game val = (Game)inpType().GetConstructor(new Type[0]).Invoke(new object[0]);
+                    val.Init();
+                    if (table.ContainsKey(key))
+                    {
+                        Console.WriteLine("Old value:");
+                        table[key].Show();
+                        table[key] = val;
+                    }
+                    table[key] = val;
+                    break;
+                case "random":
+                    Console.WriteLine("Input count to add");
+                    int c = ConsoleInput.NAT0.get();
+                    for(int i = 0; i < c;i++)
+                    {
+                        string randKey = "";
+                        for (int j = 0; j<10; j++)
+                        {
+                            randKey += (char)('a' + rand.Next('z' - 'a' + 1));
+                        }
+                        table[randKey] = (Game)randType().GetConstructor(new Type[0]).Invoke(new object[0]);
+                        table[randKey].RandomInit();
+                    }
+                    break;
+            }
+            break;
+        case "remove":
+            Console.WriteLine("Input key to remove");
+            string remKey = ConsoleInput.LINE.get();
+            if (table.ContainsKey(remKey))
+            {
+                Console.WriteLine("Removed value:");
+                table.Remove(remKey).Show();
+            }
+            else
+            {
+                Console.WriteLine("Key not contains in table");
+            }
+            break;
+        case "find":
+            Console.WriteLine("Input key to find");
+            string findKey = ConsoleInput.LINE.get();
+            if (table.ContainsKey(findKey))
+            {
+                Console.WriteLine("There are key in table");
+                Console.WriteLine("Value:");
+                table[findKey].Show();
+            }
+            else Console.WriteLine("Trere are not this key in table");
+            break;
+        case "stop":
+            stopTask2 = true;
+            break;
+        case "state":
+            Console.WriteLine("Internal state:");
+            table.Show();
+            break;
+    }
+} while (!stopTask2);

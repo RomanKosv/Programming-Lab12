@@ -115,6 +115,7 @@ namespace TestProject
                     if (pairs.Any((pair) => pair.Item1 == k))
                     {
                         Assert.AreEqual(pairs.First((pair) => pair.Item1 == k).Item2, table[k]);
+                        Assert.IsTrue(table.ContainsKey(k));
                         if (rand.Next(3) < 2)
                         {
                             Assert.AreEqual(table[k], table.Remove(k));
@@ -138,6 +139,7 @@ namespace TestProject
                     }
                     else
                     {
+                        Assert.IsFalse(table.ContainsKey(k));
                         try
                         {
                             int a = table[k];
