@@ -7,8 +7,14 @@ public class SortSet<T> where T : IComparable<T>
     public class Node
     {
         public required SortSet<T> parent;
-        public required T value;
-        public SortSet<T> left = new SortSet<T>(), right = new SortSet<T>();
+        public T value;
+        public SortSet<T> left, right;
+        public Node(T val)
+        {
+            value = val;
+            left = new SortSet<T> { parent = this };
+            right = new SortSet<T> { parent = this };
+        }
         public int rH, lH;
         public Node Max()
         {
@@ -54,7 +60,7 @@ public class SortSet<T> where T : IComparable<T>
         {
             left.node.leftAlighn();
             SortSet<T> n_right = new SortSet<T> { parent = this };
-            n_right.node = new Node { value = value, left = left.node.right, right = right, parent = n_right };
+            n_right.node = new Node(value) { left = left.node.right, right = right, parent = n_right };
             n_right.Update();
             (value, left, right) = (left.node.value, left.node.left, n_right);
             Update();
@@ -67,7 +73,7 @@ public class SortSet<T> where T : IComparable<T>
         {
             right.node.RightAlighn();
             SortSet<T> n_left = new SortSet<T> { parent = this };
-            n_left.node = new Node { parent = n_left, value = value, left = left, right = right.node.left };
+            n_left.node = new Node(value) { parent = n_left, left = left, right = right.node.left };
             n_left.Update();
             (value, left, right) = (right.node.value, n_left, right.node.right);
             Update();
@@ -95,7 +101,11 @@ public class SortSet<T> where T : IComparable<T>
             if (item.CompareTo(node.value) >= 0) node.right.Add(item);
             else node.left.Add(item);
         }
-        else node = new Node { value = item, parent = this };
+        else
+        {
+            node = new Node(item) { parent = this };
+        }
+        Update();
     }
 
     public bool Empty() { return node != null; }
@@ -103,5 +113,29 @@ public class SortSet<T> where T : IComparable<T>
     {
         if (node != null) return Math.Max(node.lH, node.rH) + 1;
         else return 0;
+    }
+    public Node? Find(IComparable<T> item)
+    {
+        if (node != null)
+        {
+            if (item.CompareTo(node.value) == 0) return node;
+            else if (item.CompareTo(node.value) < 0) return node.left.Find(item);
+            else return node.right.Find(item);
+        }
+        else return null;
+    }
+    public bool Pop(IComparable<T> item, out T? rezult)
+    {
+        Node? found = Find(item);
+        if (found != null)
+        {
+            rezult = found.Pop();
+            return true;
+        }
+        else
+        {
+            rezult = default;
+            return false;
+        }
     }
 }
