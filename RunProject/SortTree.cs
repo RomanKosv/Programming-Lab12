@@ -2,18 +2,18 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
 
-public class SortSet<T> where T : IComparable<T>
+public class SortTree<T> where T : IComparable<T>
 {
     public class Node
     {
-        public required SortSet<T> parent;
+        public required SortTree<T> parent;
         public T value;
-        public SortSet<T> left, right;
+        public SortTree<T> left, right;
         public Node(T val)
         {
             value = val;
-            left = new SortSet<T> { parent = this };
-            right = new SortSet<T> { parent = this };
+            left = new SortTree<T> { parent = this };
+            right = new SortTree<T> { parent = this };
         }
         public int rH, lH;
         public Node Max()
@@ -43,6 +43,11 @@ public class SortSet<T> where T : IComparable<T>
             {
                 parent.node = null;
             }
+            Node current = this;
+            while (current.parent.parent != null) {
+                current = current.parent.parent;
+                current.Update();
+            }
             return rez;
         }
         public void Update()
@@ -59,7 +64,7 @@ public class SortSet<T> where T : IComparable<T>
         public void RotateRight()
         {
             left.node.leftAlighn();
-            SortSet<T> n_right = new SortSet<T> { parent = this };
+            SortTree<T> n_right = new SortTree<T> { parent = this };
             n_right.node = new Node(value) { left = left.node.right, right = right, parent = n_right };
             n_right.Update();
             (value, left, right) = (left.node.value, left.node.left, n_right);
@@ -72,7 +77,7 @@ public class SortSet<T> where T : IComparable<T>
         public void RotateLeft()
         {
             right.node.RightAlighn();
-            SortSet<T> n_left = new SortSet<T> { parent = this };
+            SortTree<T> n_left = new SortTree<T> { parent = this };
             n_left.node = new Node(value) { parent = n_left, left = left, right = right.node.left };
             n_left.Update();
             (value, left, right) = (right.node.value, n_left, right.node.right);
@@ -85,7 +90,7 @@ public class SortSet<T> where T : IComparable<T>
     }
     Node? node = null;
     public required Node? parent;
-    public SortSet()
+    public SortTree()
     {
         node = null;
     }
@@ -124,7 +129,7 @@ public class SortSet<T> where T : IComparable<T>
         }
         else return null;
     }
-    public bool Pop(IComparable<T> item, out T? rezult)
+    public bool Pop(IComparable<T> item, out T rezult)
     {
         Node? found = Find(item);
         if (found != null)
@@ -137,5 +142,28 @@ public class SortSet<T> where T : IComparable<T>
             rezult = default;
             return false;
         }
+    }
+    public IEnumerable<IEnumerable<T>> Levels() {
+        if (node != null) {
+            IEnumerable<T> level = [node.value];
+            IEnumerator<IEnumerable<T>> a = node.left.Levels().GetEnumerator(), b = node.right.Levels().GetEnumerator();
+            bool end;
+            do {
+                yield return level;
+                end = true;
+                level = [];
+                if (a.MoveNext()) {
+                    level = a.Current;
+                    end = false;
+                }
+                if (b.MoveNext()) {
+                    level = level.Concat(b.Current);
+                    end = false;
+                }
+            } while (!end);
+        }
+    }
+    public static SortTree<T> NewEmpty() {
+        return new SortTree<T>() {parent = null};
     }
 }

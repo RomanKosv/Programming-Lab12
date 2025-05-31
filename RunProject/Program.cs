@@ -121,90 +121,128 @@ Type inpType()
 //}
 //GC.Collect();
 
-MyHashtable<string, Game> table = new MyHashtable<string, Game>();
-Random rand = new Random();
-bool stopTask2 = false;
-do
-{
-    Console.WriteLine("Input command (add/show/remove/find/state)");
-    switch (ConsoleInput.MEAN_PART.check(Checks.Into(["add", "show", "remove", "find", "state", "stop"]), "Command must be add, show, state, remove or find").get())
+//Task2
+// MyHashtable<string, Game> table = new MyHashtable<string, Game>();
+// Random rand = new Random();
+// bool stopTask2 = false;
+// do
+// {
+//     Console.WriteLine("Input command (add/show/remove/find/state)");
+//     switch (ConsoleInput.MEAN_PART.check(Checks.Into(["add", "show", "remove", "find", "state", "stop"]), "Command must be add, show, state, remove or find").get())
+//     {
+//         case "show":
+//             if (table.Count != 0)
+//             {
+//                 Console.WriteLine("Pairs");
+//                 foreach (var (k, v) in table.Pairs())
+//                 {
+//                     Console.WriteLine("Key:" + k);
+//                     Console.WriteLine("Value:");
+//                     v.Show();
+//                 }
+//             }
+//             else Console.WriteLine("Table empty");
+//             break;
+//         case "add":
+//             Console.WriteLine("Input mode (input/random)");
+//             switch (ConsoleInput.MEAN_PART.check(Checks.Into(["input", "random"]), "Mode must be input o random").get()) {
+//                 case "input":
+//                     Console.WriteLine("Input key to add");
+//                     string key = ConsoleInput.LINE.get();
+//                     //Console.WriteLine("Input type of game to add");
+//                     Game val = (Game)inpType().GetConstructor(new Type[0]).Invoke(new object[0]);
+//                     val.Init();
+//                     if (table.ContainsKey(key))
+//                     {
+//                         Console.WriteLine("Old value:");
+//                         table[key].Show();
+//                         table[key] = val;
+//                     }
+//                     table[key] = val;
+//                     break;
+//                 case "random":
+//                     Console.WriteLine("Input count to add");
+//                     int c = ConsoleInput.NAT0.get();
+//                     for(int i = 0; i < c;i++)
+//                     {
+//                         string randKey = "";
+//                         for (int j = 0; j<10; j++)
+//                         {
+//                             randKey += (char)('a' + rand.Next('z' - 'a' + 1));
+//                         }
+//                         table[randKey] = (Game)randType().GetConstructor(new Type[0]).Invoke(new object[0]);
+//                         table[randKey].RandomInit();
+//                     }
+//                     break;
+//             }
+//             break;
+//         case "remove":
+//             Console.WriteLine("Input key to remove");
+//             string remKey = ConsoleInput.LINE.get();
+//             if (table.ContainsKey(remKey))
+//             {
+//                 Console.WriteLine("Removed value:");
+//                 table.Remove(remKey).Show();
+//             }
+//             else
+//             {
+//                 Console.WriteLine("Key not contains in table");
+//             }
+//             break;
+//         case "find":
+//             Console.WriteLine("Input key to find");
+//             string findKey = ConsoleInput.LINE.get();
+//             if (table.ContainsKey(findKey))
+//             {
+//                 Console.WriteLine("There are key in table");
+//                 Console.WriteLine("Value:");
+//                 table[findKey].Show();
+//             }
+//             else Console.WriteLine("Trere are not this key in table");
+//             break;
+//         case "stop":
+//             stopTask2 = true;
+//             break;
+//         case "state":
+//             Console.WriteLine("Internal state:");
+//             table.Show();
+//             break;
+//     }
+// } while (!stopTask2);
+
+//Task 3
+SortTree<Pair<string, Game>> sortTree = SortTree<Pair<string, Game>>.NewEmpty();
+BalancedTree<Game> balancedTree = new BalancedTree<Game>();
+bool stopTask3 = false;
+do{
+    Console.WriteLine("Input command (add / remove / transform / operation / stop)");
+    switch (ConsoleInput.MEAN_PART.check(Checks.Into(["add", "remove", "transform", "operation", "stop"]), "Command must be add / remove / transform / operation / stop").get())
     {
-        case "show":
-            if (table.Count != 0)
-            {
-                Console.WriteLine("Pairs");
-                foreach (var (k, v) in table.Pairs())
-                {
-                    Console.WriteLine("Key:" + k);
-                    Console.WriteLine("Value:");
-                    v.Show();
-                }
-            }
-            else Console.WriteLine("Table empty");
-            break;
         case "add":
-            Console.WriteLine("Input mode (input/random)");
-            switch (ConsoleInput.MEAN_PART.check(Checks.Into(["input", "random"]), "Mode must be input o random").get()) {
-                case "input":
-                    Console.WriteLine("Input key to add");
-                    string key = ConsoleInput.LINE.get();
-                    //Console.WriteLine("Input type of game to add");
-                    Game val = (Game)inpType().GetConstructor(new Type[0]).Invoke(new object[0]);
-                    val.Init();
-                    if (table.ContainsKey(key))
-                    {
-                        Console.WriteLine("Old value:");
-                        table[key].Show();
-                        table[key] = val;
-                    }
-                    table[key] = val;
+            Console.WriteLine("Input tree to add (balanced / sorted)");
+            string tree = ConsoleInput.MEAN_PART.check(Checks.Into(["balanced", "sorted"]), "Input must be balanced or sorted").get();
+            Game game = (Game)inpType().GetConstructor(new Type[0]).Invoke(new object[0]);
+            game.Init();
+            switch (tree)
+            {
+                case "balanced":
+                    balancedTree.add(game);
                     break;
-                case "random":
-                    Console.WriteLine("Input count to add");
-                    int c = ConsoleInput.NAT0.get();
-                    for(int i = 0; i < c;i++)
-                    {
-                        string randKey = "";
-                        for (int j = 0; j<10; j++)
-                        {
-                            randKey += (char)('a' + rand.Next('z' - 'a' + 1));
-                        }
-                        table[randKey] = (Game)randType().GetConstructor(new Type[0]).Invoke(new object[0]);
-                        table[randKey].RandomInit();
-                    }
+                case "sorted":
+                    sortTree.Add(new Pair<string, Game>(game.Name, game));
                     break;
             }
             break;
         case "remove":
-            Console.WriteLine("Input key to remove");
-            string remKey = ConsoleInput.LINE.get();
-            if (table.ContainsKey(remKey))
+            Console.WriteLine("Input name to remove");
+            Pair<string, Game> found;
+            if (sortTree.Pop(new Pair<string, Game>.Key(ConsoleInput.MEAN_PART.get()), out found))
             {
-                Console.WriteLine("Removed value:");
-                table.Remove(remKey).Show();
+                Console.WriteLine("Deleted game:");
+                found.val.Show();
             }
-            else
-            {
-                Console.WriteLine("Key not contains in table");
-            }
+            else Console.WriteLine("Game not found");
             break;
-        case "find":
-            Console.WriteLine("Input key to find");
-            string findKey = ConsoleInput.LINE.get();
-            if (table.ContainsKey(findKey))
-            {
-                Console.WriteLine("There are key in table");
-                Console.WriteLine("Value:");
-                table[findKey].Show();
-            }
-            else Console.WriteLine("Trere are not this key in table");
-            break;
-        case "stop":
-            stopTask2 = true;
-            break;
-        case "state":
-            Console.WriteLine("Internal state:");
-            table.Show();
-            break;
+            
     }
-} while (!stopTask2);
+} while(!stopTask3);

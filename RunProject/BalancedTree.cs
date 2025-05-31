@@ -9,7 +9,7 @@ public class BalancedTree<T>
 	class Node 
 	{
 		public T value;
-		BalancedTree<T> left = new BalancedTree<T>(), right = new BalancedTree<T>();
+		public BalancedTree<T> left = new BalancedTree<T>(), right = new BalancedTree<T>();
 		public void add(T obj)
 		{
 			if (left.Size < right.Size) left.add(obj);
@@ -34,4 +34,24 @@ public class BalancedTree<T>
 		if (node != null) return node.countOfKeys(key, keyFun);
 		else return 0;
 	}
+	public IEnumerable<IEnumerable<T>> Levels() {
+        if (node != null) {
+            IEnumerable<T> level = [node.value];
+            IEnumerator<IEnumerable<T>> a = node.left.Levels().GetEnumerator(), b = node.right.Levels().GetEnumerator();
+            bool end;
+            do {
+                yield return level;
+                end = true;
+                level = [];
+                if (a.MoveNext()) {
+                    level = a.Current;
+                    end = false;
+                }
+                if (b.MoveNext()) {
+                    level = level.Concat(b.Current);
+                    end = false;
+                }
+            } while (!end);
+        }
+    }
 }
