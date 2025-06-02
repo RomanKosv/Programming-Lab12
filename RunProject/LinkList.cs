@@ -88,7 +88,7 @@ public class LinkList<T> : IEnumerable<T>, IList<T>
         }
         public  bool Remove(T item)
         {
-            if (value.Equals(item))
+            throw new NotImplementedException();
         }
         //public Node PushNext(T val)
         //{

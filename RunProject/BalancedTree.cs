@@ -10,10 +10,19 @@ public class BalancedTree<T>
 	{
 		public T value;
 		public BalancedTree<T> left = new BalancedTree<T>(), right = new BalancedTree<T>();
+		public int lH = 0, rH = 0;
 		public void add(T obj)
 		{
-			if (left.Size < right.Size) left.add(obj);
-			else right.add(obj);
+			if (left.Size < right.Size)
+			{
+				left.add(obj);
+				lH = left.Height();
+			}
+			else
+			{
+				right.add(obj);
+				rH = right.Height();
+			}
 		}
 		public int countOfKeys<K>(K key, Func<T, K> keyFun)
 		{
@@ -28,6 +37,7 @@ public class BalancedTree<T>
 	{
 		if (node != null) node.add(obj);
 		else node = new Node { value = obj };
+		Size++;
 	}
 	public int countOfKeys<K>(K key, Func<T, K> keyFun)
 	{
@@ -54,4 +64,14 @@ public class BalancedTree<T>
             } while (!end);
         }
     }
+	public void Clear()
+	{
+		node = null;
+		Size = 0;
+	}
+	public int Height()
+	{
+		if (node != null) return 1 + Math.Max(node.lH, node.rH);
+		else return 0;
+	}
 }

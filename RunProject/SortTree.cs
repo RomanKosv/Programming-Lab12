@@ -15,7 +15,7 @@ public class SortTree<T> where T : IComparable<T>
             left = new SortTree<T> { parent = this };
             right = new SortTree<T> { parent = this };
         }
-        public int rH, lH;
+        public int rH = 0, lH = 0;
         public Node Max()
         {
             if (right.node != null) return right.node.Max();
@@ -31,22 +31,25 @@ public class SortTree<T> where T : IComparable<T>
             T rez = value;
             if (right.node != null)
             {
-                value = right.node.Min().Pop();
-                Update();
+                Node mn = right.node.Min();
+                value = mn.value;
+                mn.Pop();
             }
             else if (left.node != null)
             {
-                value = left.node.Max().Pop();
-                Update();
+                Node mx = left.node.Max();
+                value = mx.value;
+                mx.Pop();
             }
-            else if (parent != null)
+            else
             {
                 parent.node = null;
-            }
-            Node current = this;
-            while (current.parent.parent != null) {
-                current = current.parent.parent;
-                current.Update();
+                Node current = this;
+                while (current.parent.parent != null)
+                {
+                    current = current.parent.parent;
+                    current.Update();
+                }
             }
             return rez;
         }
@@ -66,8 +69,11 @@ public class SortTree<T> where T : IComparable<T>
             left.node.leftAlighn();
             SortTree<T> n_right = new SortTree<T> { parent = this };
             n_right.node = new Node(value) { left = left.node.right, right = right, parent = n_right };
+            left.node.right.parent = n_right.node;
+            right.parent = n_right.node;
             n_right.Update();
             (value, left, right) = (left.node.value, left.node.left, n_right);
+            left.parent = this;
             Update();
         }
         public void leftAlighn()
@@ -79,8 +85,11 @@ public class SortTree<T> where T : IComparable<T>
             right.node.RightAlighn();
             SortTree<T> n_left = new SortTree<T> { parent = this };
             n_left.node = new Node(value) { parent = n_left, left = left, right = right.node.left };
+            left.parent = n_left.node;
+            right.node.left.parent = n_left.node;
             n_left.Update();
             (value, left, right) = (right.node.value, n_left, right.node.right);
+            right.parent = this;
             Update();
         }
         public void RightAlighn()
@@ -113,7 +122,7 @@ public class SortTree<T> where T : IComparable<T>
         Update();
     }
 
-    public bool Empty() { return node != null; }
+    public bool Empty() { return node == null; }
     public int Height()
     {
         if (node != null) return Math.Max(node.lH, node.rH) + 1;
@@ -165,5 +174,23 @@ public class SortTree<T> where T : IComparable<T>
     }
     public static SortTree<T> NewEmpty() {
         return new SortTree<T>() {parent = null};
+    }
+    public void Clear()
+    {
+        if (parent != null) throw new Exception("Clear will destroy invariant of parent");
+        node = null;
+        SortTree<T> current = this;
+    }
+    public IEnumerable<T> FindAll(IComparable<T> key)
+    {
+        if (node != null)
+        {
+            IEnumerable<T> vals = [];
+            int comp = key.CompareTo(node.value);
+            if (comp <= 0) vals = node.left.FindAll(key);
+            if (comp == 0) vals = vals.Append(node.value);
+            if (comp >= 0) vals = vals.Concat(node.right.FindAll(key));
+            foreach (T item in vals) yield return item;
+        }
     }
 }
