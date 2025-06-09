@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -8,160 +10,135 @@ using System.Threading.Tasks;
 
 namespace RunProject
 {
-    public class MyCollection<T> : IEnumerable<T>, IList<T>
+    public class MyCollection<K, V> : IDictionary<K, V> where K: IComparable<K>
     {
-        Node? node;
-        class Node
-        {
-            public T value;
-            public MyCollection<T> rest;
-            public T get(int ind)
-            {
-                if (ind < 0) throw new IndexOutOfRangeException();
-                else if (ind == 0) return value;
-                else return rest[ind - 1];
-            }
-            public void set(int ind, T val)
-            {
-                if (ind < 0) throw new IndexOutOfRangeException();
-                else if (ind == 0) value = val;
-                else rest[ind - 1] = val;
-            }
-            public int Count()
-            {
-                return 1 + rest.Count;
-            }
+        private SortTree<Pair<K, V>> tree = SortTree<Pair<K, V>>.NewEmpty();
 
-            internal void Add(T item)
+        public MyCollection() { }
+
+        public MyCollection(MyCollection<K, V> collection) :  this() {
+            foreach (var pair in  collection)
             {
-                rest.Add(item);
+                Add(pair);
             }
         }
-        class Enumerator : IEnumerator<T>
-        {
-            public MyCollection<T> node, start;
-            public T Current { get; private set; } = default;
 
-            object IEnumerator.Current => Current;
-
-            public void Dispose()
-            {
-                
-            }
-
-            public bool MoveNext()
-            {
-                if (node.node != null)
-                {
-                    node = node.node.rest;
-                    Current = node.node.value;
-                    return true;
-                }
-                else return false;
-            }
-
-            public void Reset()
-            {
-                node = start;
-                Current = default;
-            }
-        }
-        public T this[int index] { 
-            get
-            {
-                if (node != null) return node.get(index);
-                else throw new IndexOutOfRangeException();
-            }
+        public V this[K key] {
+            get => tree.FindAll(new Pair<K, V>.Key(key)).First().val;
             set
             {
-                if (node != null) node.set(index, value);
-                else throw new IndexOutOfRangeException();
+                Remove(key);
+                Add(key, value);
             }
         }
 
-        public int Count
+        public ICollection<K> Keys
         {
             get
             {
-                if (node != null) return node.Count();
-                else return 0;
+                if (Count != 0) return tree.Levels().Aggregate((a, b) => a.Concat(b)).Select(pair => pair.key).ToImmutableList();
+                else return [];
             }
         }
+
+        public ICollection<V> Values {
+            get
+            {
+                if (Count != 0) return tree.Levels().Aggregate((a, b) => a.Concat(b)).Select(pair => pair.val).ToImmutableList();
+                else return [];
+            }
+        }
+
+
+        public int Count { get; private set; } = 0;
 
         public bool IsReadOnly => false;
 
-        public void Add(T item)
+        public void Add(K key, V value)
         {
-            if (node != null) node.Add(item);
-            else node = new Node { value = item };
+            if (tree.FindAll(new Pair<K, V>.Key(key)).Any()) throw new NotSupportedException();
+            else
+            {
+                tree.Add(new Pair<K, V>(key, value));
+                Count++;
+            }
+        }
+
+        public void Add(KeyValuePair<K, V> item)
+        {
+            Add(item.Key, item.Value);
         }
 
         public void Clear()
         {
-            node = null;
+            tree.Clear();
+            Count = 0;
         }
 
-        public bool Contains(T item)
+        public bool Contains(KeyValuePair<K, V> item)
         {
-            return ((IEnumerable<T>)this).Contains(item);
+            return tree.FindAll(
+                new Pair<K, V>.Key(item.Key)).Any(
+                    (pair) => item.Equals(new KeyValuePair<K, V>(pair.key, pair.val))
+                );
         }
 
-        public void CopyTo(T[] array, int arrayIndex)
+        public bool ContainsKey(K key)
         {
-            int ind = arrayIndex;
-            foreach (var i in this)
+            return tree.FindAll(new Pair<K, V>.Key(key)).Any();
+        }
+
+        public void CopyTo(KeyValuePair<K, V>[] array, int arrayIndex)
+        {
+            foreach(KeyValuePair<K, V> pair in this)
             {
-                if (arrayIndex >= array.Count()) break;
-                array[ind] = i;
+                if (arrayIndex >= array.Length) break;
+                else array[arrayIndex++] = pair;
             }
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
         {
-            return new MyCollection<T>.Enumerator { start = this, node = this };
+            return tree.Levels().Aggregate((a, b) => a.Concat(b)).Select((pair) => new KeyValuePair<K, V>(pair.key, pair.val)).GetEnumerator();
         }
 
-        public int IndexOf(T item)
+        public bool Remove(K key)
         {
-            return ((IEnumerable<T>)this).Index().First(pair=> object.Equals(item, pair.Item2)).Item1;
-        }
-
-        public void Insert(int index, T item)
-        {
-            if (index == 0) node = new Node { value = item, rest = new MyCollection<T> { node = node } };
-            else if (index < 0 || node == null) throw new IndexOutOfRangeException();
-            else node.rest.Insert(index - 1, item);
-        }
-
-        public bool Remove(T item)
-        {
-            if (node == null) return false;
-            else if (object.Equals(node.value, item))
+            if (tree.Pop(new Pair<K, V>.Key(key), out var pair))
             {
-                node = node.rest.node;
+                Count--;
                 return true;
             }
-            else return node.rest.Remove(item);
+            else return false;
         }
 
-        public void RemoveAt(int index)
+        public bool Remove(KeyValuePair<K, V> item)
         {
-            if (node == null || index < 0) throw new IndexOutOfRangeException();
-            else if (index == 0) node = node.rest.node;
-            else node.rest.RemoveAt(index - 1);
+            if (tree.Pop(new Pair<K, V>.Key(item.Key), (pair) => item.Equals(new KeyValuePair<K, V>(pair.key, pair.val)), out var rez))
+            {
+                Count--;
+                return true;
+            }
+            else return false;
+        }
+
+        public bool TryGetValue(K key, [MaybeNullWhen(false)] out V value)
+        {
+            if (tree.FindAll(new Pair<K, V>.Key(key)).Any())
+            {
+                value = tree.FindAll(new Pair<K, V>.Key(key)).First().val;
+                return true;
+            }
+            else
+            {
+                value = default(V);
+                return false;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-        public void Fill(Func<T> supplier)
-        {
-            if (node != null)
-            {
-                node.value = supplier();
-                node.rest.Fill(supplier);
-            }
         }
     }
 }

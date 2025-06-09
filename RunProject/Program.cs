@@ -211,94 +211,167 @@ Type inpType()
 // } while (!stopTask2);
 
 //Task 3
-SortTree<Pair<string, Game>> sortTree = SortTree<Pair<string, Game>>.NewEmpty();
-BalancedTree<Game> balancedTree = new BalancedTree<Game>();
-bool stopTask3 = false;
-do{
-    Console.WriteLine("Input command (add / remove / transform / show / operation / stop / clear)");
-    switch (ConsoleInput.MEAN_PART.check(Checks.Into(["add", "remove", "transform", "show", "operation", "stop", "clear"]), "Command must be add / remove / transform / show / operation / stop / clear").get())
+//SortTree<Pair<string, Game>> sortTree = SortTree<Pair<string, Game>>.NewEmpty();
+//BalancedTree<Game> balancedTree = new BalancedTree<Game>();
+//bool stopTask3 = false;
+//do
+//{
+//    Console.WriteLine("Input command (add / remove / transform / show / operation / stop / clear)");
+//    switch (ConsoleInput.MEAN_PART.check(Checks.Into(["add", "remove", "transform", "show", "operation", "stop", "clear"]), "Command must be add / remove / transform / show / operation / stop / clear").get())
+//    {
+//        case "add":
+//            Console.WriteLine("Input tree to add (balanced / sorted)");
+//            string tree = ConsoleInput.MEAN_PART.check(Checks.Into(["balanced", "sorted"]), "Input must be balanced or sorted").get();
+//            Game game = (Game)inpType().GetConstructor(new Type[0]).Invoke(new object[0]);
+//            game.Init();
+//            switch (tree)
+//            {
+//                case "balanced":
+//                    balancedTree.add(game);
+//                    break;
+//                case "sorted":
+//                    sortTree.Add(new Pair<string, Game>(game.Name, game));
+//                    break;
+//            }
+//            break;
+//        case "remove":
+//            Console.WriteLine("Input name to remove");
+//            Pair<string, Game> found;
+//            if (sortTree.Pop(new Pair<string, Game>.Key(ConsoleInput.MEAN_PART.get()), out found))
+//            {
+//                Console.WriteLine("Deleted game:");
+//                found.val.Show();
+//            }
+//            else Console.WriteLine("Game not found");
+//            break;
+//        case "transform":
+//            sortTree.Clear();
+//            foreach (Game item in balancedTree.Levels().Aggregate((a, b) => a.Concat(b)))
+//            {
+//                sortTree.Add(new Pair<string, Game>(item.Name, item));
+//            }
+//            break;
+//        case "show":
+//            Console.WriteLine("Input table to show (sorted / balanced)");
+//            switch (ConsoleInput.MEAN_PART.check(Checks.Into(["sorted", "balanced"]), "Input must be sorted or balanced").get())
+//            {
+//                case "sorted":
+//                    int i = 1;
+//                    foreach (var level in sortTree.Levels())
+//                    {
+//                        Console.WriteLine($"Level {i++}:");
+//                        foreach (Game forgame in level.Select((pair) => pair.val))
+//                        {
+//                            forgame.Show();
+//                        }
+//                    }
+//                    break;
+//                case "balanced":
+//                    int i1 = 1;
+//                    foreach (var level in balancedTree.Levels())
+//                    {
+//                        Console.WriteLine($"Level {i1++}:");
+//                        foreach (Game forgame in level)
+//                        {
+//                            forgame.Show();
+//                        }
+//                    }
+//                    break;
+//            }
+//            break;
+//        case "operation":
+//            Console.WriteLine("Input name to find:");
+//            foreach (Game opfound in sortTree.FindAll(new Pair<string, Game>.Key(ConsoleInput.MEAN_PART.get())).Select((pair) => pair.val))
+//            {
+//                opfound.Show();
+//            }
+//            break;
+//        case "stop":
+//            stopTask3 = true;
+//            break;
+//        case "clear":
+//            Console.WriteLine("Input tree to clear");
+//            switch (ConsoleInput.MEAN_PART.check(Checks.Into(["sorted", "balanced"]), "Input must be sorted or balanced").get())
+//            {
+//                case "sorted":
+//                    sortTree.Clear();
+//                    break;
+//                case "balanced":
+//                    balancedTree.Clear();
+//                    break;
+//            }
+//            break;
+//    }
+//} while (!stopTask3);
+
+// Task 4
+
+MyCollection<string, Game> dict = new MyCollection<string, Game>();
+
+bool stopTask4 = false;
+
+IEnumerable<string> commands = ["stop", "remove", "add", "set", "get", "count", "contains", "clear", "show", "copy"];
+
+
+do
+{
+    Console.WriteLine($"Input command ({commands.Aggregate((a, b) => a + " / " + b)})");
+    switch (ConsoleInput.MEAN_PART.check(Checks.Into(commands), $"Command must be ({commands.Aggregate((a, b) => a + " / " + b)}").get())
     {
-        case "add":
-            Console.WriteLine("Input tree to add (balanced / sorted)");
-            string tree = ConsoleInput.MEAN_PART.check(Checks.Into(["balanced", "sorted"]), "Input must be balanced or sorted").get();
-            Game game = (Game)inpType().GetConstructor(new Type[0]).Invoke(new object[0]);
-            game.Init();
-            switch (tree)
-            {
-                case "balanced":
-                    balancedTree.add(game);
-                    break;
-                case "sorted":
-                    sortTree.Add(new Pair<string, Game>(game.Name, game));
-                    break;
-            }
+        case "stop":
+            stopTask4 = true;
             break;
         case "remove":
-            Console.WriteLine("Input name to remove");
-            Pair<string, Game> found;
-            if (sortTree.Pop(new Pair<string, Game>.Key(ConsoleInput.MEAN_PART.get()), out found))
-            {
-                Console.WriteLine("Deleted game:");
-                found.val.Show();
-            }
-            else Console.WriteLine("Game not found");
+            Console.WriteLine("Input name to remove:");
+            if (dict.Remove(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Succesful!");
+            else Console.WriteLine("Name not found.");
             break;
-        case "transform":
-            sortTree.Clear();
-            foreach (Game item in balancedTree.Levels().Aggregate((a, b) => a.Concat(b)))
+        case "add":
+            Game added = (Game)(inpType().GetConstructor(new Type[0]).Invoke(new object[0]));
+            added.Init();
+            try
             {
-                sortTree.Add(new Pair<string, Game>(item.Name, item));
+                dict.Add(added.Name, added);
+                Console.WriteLine("Succes!");
             }
-            break;
-        case "show":
-            Console.WriteLine("Input table to show (sorted / balanced)");
-            switch (ConsoleInput.MEAN_PART.check(Checks.Into(["sorted", "balanced"]), "Input must be sorted or balanced").get())
+            catch (Exception)
             {
-                case "sorted":
-                    int i = 1;
-                    foreach (var level in sortTree.Levels())
-                    {
-                        Console.WriteLine($"Level {i++}:");
-                        foreach (Game forgame in level.Select((pair) => pair.val))
-                        {
-                            forgame.Show();
-                        }
-                    }
-                    break;
-                case "balanced":
-                    int i1 = 1;
-                    foreach (var level in balancedTree.Levels())
-                    {
-                        Console.WriteLine($"Level {i1++}:");
-                        foreach (Game forgame in level)
-                        {
-                            forgame.Show();
-                        }
-                    }
-                    break;
+                Console.WriteLine("This name alredy exist.");
             }
             break;
-        case "operation":
+        case "set":
+            Game setten = (Game)(inpType().GetConstructor(new Type[0]).Invoke(new object[0]));
+            setten.Init();
+            dict[setten.Name] = setten;
+            break;
+        case "get":
+            Console.WriteLine("Input name to get:");
+            if (dict.TryGetValue(ConsoleInput.MEAN_PART.get(), out Game getten))
+            {
+                getten.Show();
+            }
+            else Console.WriteLine("Game not found.");
+            break;
+        case "count":
+            Console.WriteLine($"Count of pairs: {dict.Count}");
+            break;
+        case "contains":
             Console.WriteLine("Input name to find:");
-            foreach (Game opfound in sortTree.FindAll(new Pair<string, Game>.Key(ConsoleInput.MEAN_PART.get())).Select((pair) => pair.val))
-            {
-                opfound.Show();
-            }
-            break;
-        case "stop":
-            stopTask3 = true;
+            if (dict.ContainsKey(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Game found.");
+            else Console.WriteLine("Game not found.");
             break;
         case "clear":
-            Console.WriteLine("Input tree to clear");
-            switch (ConsoleInput.MEAN_PART.check(Checks.Into(["sorted", "balanced"]), "Input must be sorted or balanced").get())
+            dict.Clear();
+            break;
+        case "show":
+            if (dict.Count == 0) Console.WriteLine("Dictionay is empty");
+            foreach (var i in dict.Values)
             {
-                case "sorted":
-                    sortTree.Clear();
-                    break;
-                case "balanced":
-                    balancedTree.Clear();
-                    break;
+                i.Show();
             }
             break;
+        case "copy":
+            dict = new MyCollection<string, Game>(dict);
+            break;
     }
-} while(!stopTask3);
+} while (!stopTask4);

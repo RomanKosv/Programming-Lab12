@@ -138,9 +138,45 @@ public class SortTree<T> where T : IComparable<T>
         }
         else return null;
     }
+
+    public Node? Find(IComparable<T> item, Predicate<T> check)
+    {
+        if (node != null)
+        {
+            int cmp = item.CompareTo(node.value);
+            if (cmp == 0 && check(node.value)) return node;
+            if (cmp <= 0)
+            {
+                Node? rez = node.left.Find(item);
+                if (rez != null) return rez;
+            }
+            if (cmp >= 0)
+            {
+                Node? rez = node.right.Find(item);
+                if (rez != null) return rez;
+            }
+        }
+        return null;
+    }
+
     public bool Pop(IComparable<T> item, out T rezult)
     {
         Node? found = Find(item);
+        if (found != null)
+        {
+            rezult = found.Pop();
+            return true;
+        }
+        else
+        {
+            rezult = default;
+            return false;
+        }
+    }
+
+    public bool Pop(IComparable<T> item, Predicate<T> check, out T rezult)
+    {
+        Node? found = Find(item, check);
         if (found != null)
         {
             rezult = found.Pop();
@@ -192,5 +228,6 @@ public class SortTree<T> where T : IComparable<T>
             if (comp >= 0) vals = vals.Concat(node.right.FindAll(key));
             foreach (T item in vals) yield return item;
         }
+        yield break;
     }
 }

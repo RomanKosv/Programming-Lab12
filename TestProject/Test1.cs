@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Xml;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using RunProject;
 
 namespace TestProject
@@ -223,6 +224,44 @@ namespace TestProject
                 Assert.IsTrue(tree.Empty());
                 Assert.AreEqual(tree.Height(), 0);
                 Assert.AreEqual(tree.Levels().Count(), 0);
+            }
+        }
+    }
+    [TestClass]
+    public class Test4
+    {
+        
+        public static Random rand = new Random();
+
+        public SortedDictionary<int, int> randDict(int count, int min = -50, int max = 50)
+        {
+            SortedDictionary<int, int> dict = new SortedDictionary<int, int>();
+            for (int i = 0; i < count; i++)
+            {
+                dict[rand.Next(min, max)] = rand.Next(min, max);
+            }
+            return dict;
+        }
+
+        public int randomTest(int count, out MyCollection<int, int> coll, out SortedDictionary<int, int> dict, int min = -50, int max = 50)
+        {
+            dict = randDict(count, min, max);
+            coll = new MyCollection<int, int>();
+            foreach(var (k, v) in dict)
+            {
+                coll[k] = v;
+            }
+            return coll.Count;
+        }
+
+        public static int tests = 30;
+
+        [TestMethod]
+        public void Test()
+        {
+            for (int t = 0; t < tests; t++)
+            {
+                int count = randomTest(50, out var coll, out var dict);
             }
         }
     }
