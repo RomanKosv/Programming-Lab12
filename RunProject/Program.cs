@@ -306,12 +306,131 @@ Type inpType()
 
 // Task 4
 
-MyCollection<string, Game> dict = new MyCollection<string, Game>();
+//MyCollection<string, Game> dict = new MyCollection<string, Game>();
 
-bool stopTask4 = false;
+//bool stopTask4 = false;
 
-IEnumerable<string> commands = ["stop", "remove", "add", "set", "get", "count", "contains", "clear", "show", "copy"];
+//IEnumerable<string> commands = ["stop", "remove", "add", "set", "get", "count", "contains", "clear", "show", "copy"];
 
+
+//do
+//{
+//    Console.WriteLine($"Input command ({commands.Aggregate((a, b) => a + " / " + b)})");
+//    switch (ConsoleInput.MEAN_PART.check(Checks.Into(commands), $"Command must be ({commands.Aggregate((a, b) => a + " / " + b)}").get())
+//    {
+//        case "stop":
+//            stopTask4 = true;
+//            break;
+//        case "remove":
+//            Console.WriteLine("Input name to remove:");
+//            if (dict.Remove(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Succesful!");
+//            else Console.WriteLine("Name not found.");
+//            break;
+//        case "add":
+//            Game added = (Game)(inpType().GetConstructor(new Type[0]).Invoke(new object[0]));
+//            added.Init();
+//            try
+//            {
+//                dict.Add(added.Name, added);
+//                Console.WriteLine("Succes!");
+//            }
+//            catch (Exception)
+//            {
+//                Console.WriteLine("This name alredy exist.");
+//            }
+//            break;
+//        case "set":
+//            Game setten = (Game)(inpType().GetConstructor(new Type[0]).Invoke(new object[0]));
+//            setten.Init();
+//            dict[setten.Name] = setten;
+//            break;
+//        case "get":
+//            Console.WriteLine("Input name to get:");
+//            if (dict.TryGetValue(ConsoleInput.MEAN_PART.get(), out Game getten))
+//            {
+//                getten.Show();
+//            }
+//            else Console.WriteLine("Game not found.");
+//            break;
+//        case "count":
+//            Console.WriteLine($"Count of pairs: {dict.Count}");
+//            break;
+//        case "contains":
+//            Console.WriteLine("Input name to find:");
+//            if (dict.ContainsKey(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Game found.");
+//            else Console.WriteLine("Game not found.");
+//            break;
+//        case "clear":
+//            dict.Clear();
+//            break;
+//        case "show":
+//            if (dict.Count == 0) Console.WriteLine("Dictionay is empty");
+//            foreach (var i in dict.Values)
+//            {
+//                i.Show();
+//            }
+//            break;
+//        case "copy":
+//            dict = new MyCollection<string, Game>(dict);
+//            break;
+//    }
+//} while (!stopTask4);
+
+//Lab 13
+
+MyObservableCollection<string, Game> dict_1 = new MyObservableCollection<string, Game>();
+
+bool stopLab13_1 = false;
+
+Journal journal_1 = new Journal();
+
+dict_1.CollectionCountChanged += (o, e) =>
+{
+    journal_1.Add(new Journal.Entry("dict1", e.info, $"""
+        Key:
+        {e.pair.Key}
+        Value:
+        {e.pair.Value}
+        """));
+};
+
+dict_1.CollectionReferenceChanged+= (o, e) =>
+{
+    journal_1.Add(new Journal.Entry("dict1", e.info, $"""
+        Key:
+        {e.pair.Key}
+        Value:
+        {e.pair.Value}
+        """));
+};
+
+MyObservableCollection<string, Game> dict_2 = new MyObservableCollection<string, Game>();
+
+Journal journal_2 = new Journal();
+
+dict_1.CollectionReferenceChanged += (o, e) =>
+{
+    journal_2.Add(new Journal.Entry("dict1", e.info, $"""
+        Key:
+        {e.pair.Key}
+        Value:
+        {e.pair.Value}
+        """));
+};
+
+dict_2.CollectionReferenceChanged += (o, e) =>
+{
+    journal_2.Add(new Journal.Entry("dict2", e.info, $"""
+        Key:
+        {e.pair.Key}
+        Value:
+        {e.pair.Value}
+        """));
+};
+
+IEnumerable<string> commands = ["stop", "remove", "add", "set", "get", "count", "contains", "clear", "show", "copy", "journal1", "journal2"];
+
+Console.WriteLine("Edit collection 1");
 
 do
 {
@@ -319,11 +438,11 @@ do
     switch (ConsoleInput.MEAN_PART.check(Checks.Into(commands), $"Command must be ({commands.Aggregate((a, b) => a + " / " + b)}").get())
     {
         case "stop":
-            stopTask4 = true;
+            stopLab13_1 = true;
             break;
         case "remove":
             Console.WriteLine("Input name to remove:");
-            if (dict.Remove(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Succesful!");
+            if (dict_1.Remove(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Succesful!");
             else Console.WriteLine("Name not found.");
             break;
         case "add":
@@ -331,7 +450,7 @@ do
             added.Init();
             try
             {
-                dict.Add(added.Name, added);
+                dict_1.Add(added.Name, added);
                 Console.WriteLine("Succes!");
             }
             catch (Exception)
@@ -342,36 +461,120 @@ do
         case "set":
             Game setten = (Game)(inpType().GetConstructor(new Type[0]).Invoke(new object[0]));
             setten.Init();
-            dict[setten.Name] = setten;
+            dict_1[setten.Name] = setten;
             break;
         case "get":
             Console.WriteLine("Input name to get:");
-            if (dict.TryGetValue(ConsoleInput.MEAN_PART.get(), out Game getten))
+            if (dict_1.TryGetValue(ConsoleInput.MEAN_PART.get(), out Game getten))
             {
                 getten.Show();
             }
             else Console.WriteLine("Game not found.");
             break;
         case "count":
-            Console.WriteLine($"Count of pairs: {dict.Count}");
+            Console.WriteLine($"Count of pairs: {dict_1.Count}");
             break;
         case "contains":
             Console.WriteLine("Input name to find:");
-            if (dict.ContainsKey(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Game found.");
+            if (dict_1.ContainsKey(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Game found.");
             else Console.WriteLine("Game not found.");
             break;
         case "clear":
-            dict.Clear();
+            dict_1.Clear();
             break;
         case "show":
-            if (dict.Count == 0) Console.WriteLine("Dictionay is empty");
-            foreach (var i in dict.Values)
+            if (dict_1.Count == 0) Console.WriteLine("Dictionay is empty");
+            foreach (var i in dict_1.Values)
             {
                 i.Show();
             }
             break;
         case "copy":
-            dict = new MyCollection<string, Game>(dict);
+            dict_1 = new MyObservableCollection<string, Game>(dict_1);
+            break;
+        case "journal1":
+            if (journal_1.Count!= 0) Console.WriteLine(journal_1);
+            else Console.WriteLine("Journal 1 is empty");
+            break;
+        case "journal2":
+            if (journal_2.Count == 0) Console.WriteLine("Journal 2 is empty");
+            else Console.WriteLine(journal_2);
             break;
     }
-} while (!stopTask4);
+} while (!stopLab13_1);
+
+
+bool stopLab13_2 = false;
+
+Console.WriteLine("Edit collection 2");
+
+do
+{
+    Console.WriteLine($"Input command ({commands.Aggregate((a, b) => a + " / " + b)})");
+    switch (ConsoleInput.MEAN_PART.check(Checks.Into(commands), $"Command must be ({commands.Aggregate((a, b) => a + " / " + b)}").get())
+    {
+        case "stop":
+            stopLab13_2 = true;
+            break;
+        case "remove":
+            Console.WriteLine("Input name to remove:");
+            if (dict_2.Remove(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Succesful!");
+            else Console.WriteLine("Name not found.");
+            break;
+        case "add":
+            Game added = (Game)(inpType().GetConstructor(new Type[0]).Invoke(new object[0]));
+            added.Init();
+            try
+            {
+                dict_2.Add(added.Name, added);
+                Console.WriteLine("Succes!");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("This name alredy exist.");
+            }
+            break;
+        case "set":
+            Game setten = (Game)(inpType().GetConstructor(new Type[0]).Invoke(new object[0]));
+            setten.Init();
+            dict_2[setten.Name] = setten;
+            break;
+        case "get":
+            Console.WriteLine("Input name to get:");
+            if (dict_2.TryGetValue(ConsoleInput.MEAN_PART.get(), out Game getten))
+            {
+                getten.Show();
+            }
+            else Console.WriteLine("Game not found.");
+            break;
+        case "count":
+            Console.WriteLine($"Count of pairs: {dict_2.Count}");
+            break;
+        case "contains":
+            Console.WriteLine("Input name to find:");
+            if (dict_2.ContainsKey(ConsoleInput.MEAN_PART.get())) Console.WriteLine("Game found.");
+            else Console.WriteLine("Game not found.");
+            break;
+        case "clear":
+            dict_2.Clear();
+            break;
+        case "show":
+            if (dict_2.Count == 0) Console.WriteLine("Dictionay is empty");
+            foreach (var i in dict_2.Values)
+            {
+                i.Show();
+            }
+            break;
+        case "copy":
+            dict_2 = new MyObservableCollection<string, Game>(dict_2);
+            break;
+        case "journal1":
+            if (journal_1.Count != 0) Console.WriteLine(journal_1);
+            else Console.WriteLine("Journal 1 is empty");
+            break;
+        case "journal2":
+            if (journal_2.Count == 0) Console.WriteLine("Journal 2 is empty");
+            else Console.WriteLine(journal_2);
+            break;
+    }
+} while (!stopLab13_2);
