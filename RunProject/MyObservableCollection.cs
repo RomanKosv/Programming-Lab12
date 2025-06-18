@@ -16,6 +16,10 @@ namespace RunProject
         public delegate void CollectionHandler(object collection, CollectionEventArgs<K, V> args);
         public event CollectionHandler CollectionCountChanged;
         public event CollectionHandler CollectionReferenceChanged;
+        private void ThrowRewrite(K key, V value)
+        {
+            CollectionReferenceChanged?.Invoke(this, new CollectionEventArgs<K, V>("rewrite", new KeyValuePair<K, V>(key, value)));
+        }
         public new V this[K key]
         {
             set
@@ -23,15 +27,21 @@ namespace RunProject
                 if (ContainsKey(key))
                 {
                     base[key] = value;
-                    CollectionReferenceChanged?.Invoke(this, new CollectionEventArgs<K, V>("rewrite", new KeyValuePair<K, V>(key, value)));
+                    ThrowRewrite(key, value);
                 }
                 else
                 {
                     base[key] = value;
-                    CollectionCountChanged?.Invoke(this, new CollectionEventArgs<K, V>("add", new KeyValuePair<K, V>(key, value)));
+                    ThrowAdd(key, value);
                 }
             }
         }
+
+        private void ThrowAdd(K key, V value)
+        {
+            CollectionCountChanged?.Invoke(this, new CollectionEventArgs<K, V>("add", new KeyValuePair<K, V>(key, value)));
+        }
+
         public new void Add(KeyValuePair<K, V> item)
         {
             Add(item.Key, item.Value);
@@ -39,7 +49,7 @@ namespace RunProject
         public new void Add(K key, V value)
         {
             base.Add(key, value);
-            CollectionCountChanged?.Invoke(this, new CollectionEventArgs<K, V>("add", new KeyValuePair<K, V>(key, value)));
+            ThrowAdd(key, value);
         }
         public new void Clear()
         {
@@ -53,16 +63,22 @@ namespace RunProject
             if (TryGetValue(key, out V value))
             {
                 base.Remove(key);
-                CollectionCountChanged?.Invoke(this, new CollectionEventArgs<K, V>("remove", new KeyValuePair<K, V>(key, value)));
+                ThrowRemove(key, value);
                 return true;
             }
             else return false;
         }
+
+        private void ThrowRemove(K key, V value)
+        {
+            CollectionCountChanged?.Invoke(this, new CollectionEventArgs<K, V>("remove", new KeyValuePair<K, V>(key, value)));
+        }
+
         public new bool Remove(KeyValuePair<K, V> item)
         {
             if (base.Remove(item))
             {
-                CollectionCountChanged?.Invoke(this, new CollectionEventArgs<K, V>("remove", item));
+                ThrowRemove(item.Key, item.Value);
                 return true;
             }
             else return false;

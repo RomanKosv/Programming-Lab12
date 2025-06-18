@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\InputLibrary\InputLibrary.csproj" />
     <ProjectReference Include="..\..\Lab10\GameLibrary\GameLibrary.csproj" />
+    <ProjectReference Include="..\RunProject\RunProject.csproj" />
   </ItemGroup>
 
 </Project>
