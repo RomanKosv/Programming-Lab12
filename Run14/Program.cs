@@ -38,7 +38,15 @@ Type inpType()
 
 void ShowAll(IEnumerable<Game> games)
 {
-    foreach (Game g in games) g.Show();
+    if (games.Any())
+        foreach (Game g in games) g.Show();
+    else Console.WriteLine("There no games");
+}
+void ShowAllNames(IEnumerable<string> names)
+{
+    if (names.Any())
+        foreach(string name in names) Console.WriteLine(name);
+    else Console.WriteLine("There no games");
 }
 
 SortedDictionary<string, List<Game>> net = new SortedDictionary<string, List<Game>>();
@@ -85,10 +93,7 @@ Stopwatch timer2 = new Stopwatch();
     }
     timer2.Stop();
     Console.WriteLine("Correct games:");
-    foreach (Game g in corrects)
-    {
-        g.Show();
-    }
+    ShowAll(corrects);
 }
 {
     Console.WriteLine("Input shops thats collections must be compared");
@@ -99,11 +104,11 @@ Stopwatch timer2 = new Stopwatch();
     {
         IEnumerable<string> coll1 = net[name1].Select(g => g.Name), coll2 = net[name2].Select(g => g.Name);
         System.Console.WriteLine($"Games unical for {name1}");
-        foreach (string name in coll1.Except(coll2)) System.Console.WriteLine(name);
+        ShowAllNames(coll1.Except(coll2));
         System.Console.WriteLine($"Games unical for {name2}");
-        foreach (string name in coll2.Except(coll1)) System.Console.WriteLine(name);
+        ShowAllNames(coll2.Except(coll1));
         System.Console.WriteLine($"Games contrains in both");
-        foreach (string name in coll2.Intersect(coll1)) System.Console.WriteLine(name);
+        ShowAllNames(coll2.Intersect(coll1));
     }
 }
 {
@@ -130,20 +135,33 @@ Stopwatch timer2 = new Stopwatch();
     }
 }
 System.Console.WriteLine($"""
-Time for LINQ is {timer1.ElapsedMilliseconds} ms
-Time for foreach is {timer2.ElapsedMilliseconds} ms
+Time for LINQ is {timer1.ElapsedTicks} ticks
+Time for foreach is {timer2.ElapsedTicks} ticks
 """);
-MyCollection<string, Game> coll = new MyCollection<string, Game>();
-System.Console.WriteLine("Input count of games to create:");
-int c = ConsoleInput.NATURAL.get();
-for (int i = 0; i < c; i++)
 {
-    Game new_game = (Game)(randType().GetConstructor(new Type[0]).Invoke(new object[0]));
-    new_game.RandomInit();
-    coll[new_game.Name] = new_game;
+    MyCollection<string, Game> coll = new MyCollection<string, Game>();
+    System.Console.WriteLine("Input count of games to create:");
+    int c = ConsoleInput.NATURAL.get();
+    for (int i = 0; i < c; i++)
+    {
+        Game new_game = (Game)(randType().GetConstructor(new Type[0]).Invoke(new object[0]));
+        new_game.RandomInit();
+        coll[new_game.Name] = new_game;
+        new_game.Show();
+    }
+    System.Console.WriteLine("Input necesary count of players");
+    int nec = ConsoleInput.NATURAL.get();
+    var tableGames = (from g in coll.Values where g is TableGame tg select (TableGame)g);
+    IEnumerable<TableGame> correctGames = tableGames.Where(tg => tg.MinPlayers <= nec && nec <= tg.MaxPlayers);
+    double average_min_payers = (from g in tableGames select g.MinPlayers).Average();
+    Console.WriteLine($"Average minimal count of players in table games is {average_min_payers}");
+    Console.WriteLine($"Table games you can play {correctGames.Count()}");
+    IEnumerable<IGrouping<TableGame.Field?, Game>> fields = correctGames.GroupBy(g => g.GameField);
+    foreach (var group in fields)
+    {
+        if (group.Key == null) Console.WriteLine("Table games with no field:");
+        else Console.WriteLine($"Table games with field '{group.Key.Name}':");
+        foreach (var g in group) Console.WriteLine(g.Name);
+    }
+    
 }
-System.Console.WriteLine("Input necesary count of players");
-int nec = ConsoleInput.NATURAL.get();
-IEnumerable<TableGame> tableGames = (from g in coll.Values where g is TableGame tg select (TableGame)g).Where(tg => tg.MinPlayers <= nec && nec <= tg.MaxPlayers);
-IEnumerable<IGrouping<TableGame.Field, Game>> fields = tableGames.GroupBy(g => g.GameField);
-System.Console.WriteLine("");
