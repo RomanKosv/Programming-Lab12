@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using InputLibrary;
 
 namespace RunProject
 {
@@ -19,7 +20,19 @@ namespace RunProject
         public MyCollection(MyCollection<K, V> collection) :  this() {
             foreach (var pair in  collection)
             {
-                Add(pair);
+                K key = pair.Key;
+                V value = pair.Value;
+                if (key is ICloneable cl_key) key = (K)cl_key.Clone();
+                if (value is ICloneable cl_value) value = (V)cl_value.Clone();
+                Add(new KeyValuePair<K, V>(key, value));
+            }
+        }
+
+        public MyCollection(int lenght, Supplier<K> keySupplier, Supplier<V> valSupplier) : this()
+        {
+            while (Count != lenght)
+            {
+                this[keySupplier()] = valSupplier();
             }
         }
 
@@ -93,7 +106,14 @@ namespace RunProject
             foreach(KeyValuePair<K, V> pair in this)
             {
                 if (arrayIndex >= array.Length) break;
-                else array[arrayIndex++] = pair;
+                else
+                {
+                    K key = pair.Key;
+                    V val = pair.Value;
+                    if (key is ICloneable keyClone) key = (K)keyClone.Clone();
+                    if (val is ICloneable valClone) val = (V)valClone.Clone();
+                    array[arrayIndex++] = new KeyValuePair<K, V>(key, val);
+                }
             }
         }
 
